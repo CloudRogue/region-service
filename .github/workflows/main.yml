@@ -1,0 +1,48 @@
+name: Region Service CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write  # OIDC 인증을 위해 필수
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. AWS 자격 증명 설정 (OIDC 방식 유지)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_OIDC_REGION }}
+
+      # 2. Amazon ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 3. Docker 이미지 빌드 및 ECR 푸시
+      - name: Build and Push to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # 지역 서비스용 ECR 리포지토리 이름 (마스킹)
+          ECR_REPOSITORY: region-service 
+          IMAGE_TAG: latest
+        run: |
+          # Dockerfile 내에서 Gradle 빌드가 수행됩니다.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # 4. ECS 서비스 업데이트 (강제 재배포)
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
+                                 --service ${{ secrets.ECS_REGION_SERVICE_NAME }} \
+                                 --force-new-deployment \
+                                 --region ${{ secrets.AWS_OIDC_REGION }}
