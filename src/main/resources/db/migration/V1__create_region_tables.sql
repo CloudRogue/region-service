@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS region_meta (
+    meta_key   VARCHAR(50)  NOT NULL,
+    meta_value VARCHAR(200) NOT NULL,
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (meta_key)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS region_city (
+    city_code  VARCHAR(2)   NOT NULL,
+    city_name  VARCHAR(100) NOT NULL,
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (city_code)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS region_sigungu (
+    sigungu_code VARCHAR(5)   NOT NULL,
+    sigungu_name VARCHAR(100) NOT NULL,
+    city_code    VARCHAR(2)   NOT NULL,
+    created_at   DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at   DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (sigungu_code),
+    KEY idx_sigungu_city_code (city_code),
+    CONSTRAINT fk_sigungu_city
+    FOREIGN KEY (city_code) REFERENCES region_city(city_code)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
