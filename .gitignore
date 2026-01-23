@@ -41,4 +41,4 @@ env
 .env.*
 
 # test config
-apps/announcements/src/test/resources/application-test.yml
+src/test/resources/application-test.yml
