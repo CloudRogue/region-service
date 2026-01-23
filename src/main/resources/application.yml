@@ -25,6 +25,8 @@ spring:
     locations: ${FLYWAY_LOCATIONS}
     baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE}
     clean-disabled: ${FLYWAY_CLEAN_DISABLED}
+    repair-on-migrate: ${FLYWAY_REPAIR_ON_MIGRATE:false}
+    validate-on-migrate: ${FLYWAY_VALIDATE_ON_MIGRATE:true}
 
 regions:
   cacheSeconds: ${REGIONS_CACHE_SECONDS}
